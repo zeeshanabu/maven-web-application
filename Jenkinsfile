@@ -1,0 +1,34 @@
+node{
+
+def mavenHome = tool name: 'maven3.9.5'
+
+echo "The Job Name is: ${env.JOB_NAME}"
+echo "Jenkins Home Directory is: ${env.JENKINS_HOME}"
+echo "The Jenkins Node Name is: ${env.NODE_NAME}"
+echo "The Build number is: ${env.BUILD_NUMBER}"
+
+
+properties([[$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false], [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
+
+stage('CheckoutCode'){
+git 'https://github.com/zeeshanabu/maven-web-application.git'
+}
+
+stage('Build'){
+sh "${mavenHome}/bin/mvn clean package"
+}
+
+stage('ExecuteSonarQubeReport'){
+sh "${mavenHome}/bin/mvn clean sonar:sonar"
+}
+
+stage('uploadArtifactoryIntoNexus'){
+sh "${mavenHome}/bin/mvn clean deploy"
+}
+
+stage('DeployAppTomcat'){
+sshagent(['eb24b887-7589-4a12-a0f2-7051d142c872']) {
+   sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war centos@172.31.82.12:/opt/apache-tomcat-9.0.89/webapps/"
+}
+}
+}
