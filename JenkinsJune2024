@@ -17,7 +17,8 @@ git 'https://github.com/zeeshanabu/maven-web-application.git'
 stage('Build'){
 sh "${mavenHome}/bin/mvn clean package"
 }
-
+//
+/*
 stage('ExecuteSonarQubeReport'){
 sh "${mavenHome}/bin/mvn clean sonar:sonar"
 }
@@ -31,4 +32,5 @@ sshagent(['eb24b887-7589-4a12-a0f2-7051d142c872']) {
    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war centos@172.31.82.12:/opt/apache-tomcat-9.0.89/webapps/"
 }
 }
+*/
 }
